@@ -1,0 +1,117 @@
+<link rel="icon" href="HyMexV1.png">
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Status - Hymex Nw</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-image: url('fondo.jpg');
+            background-repeat: no-repeat;
+            background-size: auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: white;
+            margin-bottom: 20px;
+        }
+
+        .server {
+            background-color: white;
+            width: 30%;
+            height: auto;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .server-name {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .status {
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .offline {
+            color: #dc3545;
+        }
+
+        .online {
+            color: #28a745;
+        }
+    </style>
+</head>
+<body>
+    <h1>Estado de nuestros servidores</h1>
+    <center>
+        <div id="serverStatus"></div>
+    </center>
+
+    <script>
+        var servers = [
+            { name: "Proxy", ip: "154.16.171.166:25565", previousOnline: false },
+            { name: "AuthLobby", ip: "154.16.171.166:25567", previousOnline: false },
+            { name: "Lobby #1", ip: "154.16.171.166:25570", previousOnline: false },
+            { name: "SkyWars", ip: "154.16.171.166:25566", previousOnline: false },
+            { name: "Survival", ip: "154.16.171.166:25571", previousOnline: false },
+            // Puedes agregar más servidores aquí según sea necesario
+        ];
+
+        window.onload = function() {
+            updateStatus();
+            setInterval(updateStatus, 5000); // Actualiza el estado cada 5 segundos
+        };
+
+        function updateStatus() {
+            servers.forEach(function(server) {
+                checkMinecraftServerStatus(server);
+            });
+        }
+
+        function checkMinecraftServerStatus(server) {
+            fetch("https://api.mcsrvstat.us/2/" + server.ip)
+            .then(function(response) {
+                if (response.ok) {
+                    return response.json();
+                }
+                throw new Error('Network response was not ok.');
+            })
+            .then(function(data) {
+                var statusMessage = server.name + ": ";
+                var currentOnline = data.online;
+                if (currentOnline !== server.previousOnline || !document.getElementById(server.name.replace(/\s+/g, ''))) {
+                    server.previousOnline = currentOnline;
+                    var serverStatusContainer = document.getElementById("serverStatus");
+                    var serverElement = document.getElementById(server.name.replace(/\s+/g, ''));
+                    if (serverElement) {
+                        serverElement.innerHTML = "<div class='server-name'>" + statusMessage + (currentOnline ? "<span class='status online'>En línea</span>" : "<span class='status offline'>Fuera de línea</span>") + "</div>";
+                    } else {
+                        serverStatusContainer.innerHTML += "<div class='server' id='" + server.name.replace(/\s+/g, '') + "'><div class='server-name'>" + statusMessage + (currentOnline ? "<span class='status online'>En línea</span>" : "<span class='status offline'>Fuera de línea</span>") + "</div></div>";
+                    }
+                }
+            })
+            .catch(function(error) {
+                var errorMessage = server.name + ": <span class='status offline'>Error al verificar el estado del servidor</span>";
+                var serverStatusContainer = document.getElementById("serverStatus");
+                var serverElement = document.getElementById(server.name.replace(/\s+/g, ''));
+                if (serverElement) {
+                    serverElement.innerHTML = "<div class='server-name'>" + errorMessage + "</div>";
+                } else {
+                    serverStatusContainer.innerHTML += "<div class='server' id='" + server.name.replace(/\s+/g, '') + "'><div class='server-name'>" + errorMessage + "</div></div>";
+                }
+            });
+        }
+    </script>
+</body>
+</html>
