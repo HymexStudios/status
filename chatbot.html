@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chat con Bot</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #22323F;
+      /* Color de fondo */
+      margin: 0;
+      padding: 0;
+    }
+
+    .chat-container {
+      width: 400px;
+      /* Ancho del chat */
+      margin: 20px auto;
+      border: 1px solid #ccc;
+      border-radius: 20px;
+      /* Bordes redondeados */
+      overflow: hidden;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      background-color: #f9f9f9;
+      /* Color de fondo del contenedor del chat */
+    }
+
+    .chat-header {
+      background-color: #FFA500;
+      /* Color de fondo del encabezado */
+      color: #fff;
+      padding: 15px;
+      text-align: center;
+      border-bottom: 1px solid #ccc;
+      border-top-left-radius: 20px;
+      /* Bordes redondeados en la esquina superior izquierda */
+      border-top-right-radius: 20px;
+      /* Bordes redondeados en la esquina superior derecha */
+    }
+
+    .chat-messages {
+      padding: 10px;
+      overflow-y: auto;
+      max-height: 300px;
+      /* Altura máxima del área de mensajes */
+    }
+
+    .message {
+      margin-bottom: 5px;
+      /* Separación entre mensajes */
+      opacity: 0;
+      animation: fadeIn 0.5s forwards;
+    }
+
+    .bot-message,
+    .user-message {
+      padding: 10px;
+      border-radius: 10px;
+      margin-bottom: 5px;
+      /* Separación entre mensajes */
+    }
+
+    .bot-message {
+      text-align: left;
+    }
+
+    .user-message {
+      text-align: right;
+    }
+
+    .chat-input {
+      padding: 10px;
+      background-color: #f9f9f9;
+      /* Color de fondo del área de entrada de texto */
+      border-top: 1px solid #ccc;
+      border-bottom-left-radius: 20px;
+      /* Bordes redondeados en la esquina inferior izquierda */
+      border-bottom-right-radius: 20px;
+      /* Bordes redondeados en la esquina inferior derecha */
+      display: flex;
+      align-items: center;
+    }
+
+    input[type="text"] {
+      flex: 1;
+      padding: 8px;
+      margin-right: 10px;
+      border: 1px solid #ccc;
+      border-radius: 20px;
+      outline: none;
+    }
+
+    input[type="text"]:focus {
+      border-color: #007bff;
+    }
+
+    button {
+      padding: 8px 20px;
+      background-color: #FFA500;
+      /* Color de fondo de los botones */
+      color: #fff;
+      border: none;
+      border-radius: 20px;
+      cursor: pointer;
+      outline: none;
+    }
+
+    button:hover {
+      background-color: #FF6347;
+      /* Color de fondo de los botones al pasar el mouse */
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+
+      to {
+        opacity: 1;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="chat-container">
+    <div class="chat-header">
+      <img src="HyMexV1.png" alt="" style="vertical-align: middle; width: 30px; height: 30px; border-radius: 50%;">
+      <span>Hymex Bot</span>
+    </div>
+    <div class="chat-messages">
+      <!-- El mensaje inicial del bot se agregará aquí -->
+    </div>
+    <div class="chat-input" id="chat-input" style="display:none;">
+      <input type="text" id="user-input" placeholder="Escribe tu mensaje..." onkeydown="handleKeyDown(event)">
+      <button onclick="sendMessage()" id="sendButton" disabled>Enviar</button>
+    </div>
+  </div>
+
+  <script>
+    // Función para enviar un mensaje
+    function sendMessage() {
+      var userInput = document.getElementById("user-input").value;
+      if (userInput.trim() === "") return; // Si el mensaje está vacío, no enviar nada
+      var chatMessages = document.querySelector(".chat-messages");
+
+      // Agregar mensaje del usuario al chat
+      var userMessage = document.createElement("div");
+      userMessage.classList.add("message", "user-message");
+      userMessage.textContent = userInput;
+      chatMessages.appendChild(userMessage);
+
+      // Limpiar el campo de entrada del usuario
+      document.getElementById("user-input").value = "";
+
+      // Hacer scroll hacia abajo para mostrar el último mensaje
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+
+      // Después de que el usuario envíe un mensaje, esperar 1 segundo y luego mostrar el campo de entrada del usuario nuevamente
+      setTimeout(function () {
+        document.getElementById("chat-input").style.display = "flex";
+        document.getElementById("user-input").focus();
+      }, 1000);
+
+      // Deshabilitar el botón de enviar
+      document.getElementById("sendButton").disabled = true;
+
+      // Procesar el mensaje del usuario
+      processUserMessage(userInput.toLowerCase());
+    }
+
+    // Función para manejar el evento de presionar tecla
+    function handleKeyDown(event) {
+      if (event.keyCode === 13) {
+        event.preventDefault(); // Prevenir el comportamiento predeterminado (enviar formulario)
+        var userInput = document.getElementById("user-input").value.trim();
+        if (userInput !== "") {
+          sendMessage(); // Si hay algo escrito, enviar el mensaje
+        }
+      }
+    }
+
+    // Función para enviar el mensaje inicial del bot
+    function sendInitialBotMessage() {
+      var chatMessages = document.querySelector(".chat-messages");
+
+      // Mensaje inicial del bot
+      var botMessage = document.createElement("div");
+      botMessage.classList.add("message", "bot-message");
+      botMessage.textContent = "Hola, ¿en qué puedo ayudarte?";
+      chatMessages.appendChild(botMessage);
+
+      // Hacer scroll hacia abajo para mostrar el último mensaje
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+
+      // Esperar 2 segundos y luego enviar el mensaje de opciones del bot
+      setTimeout(function () {
+        sendBotOptions();
+      }, 2000);
+    }
+
+    // Función para enviar el mensaje de opciones del bot
+    function sendBotOptions() {
+      var chatMessages = document.querySelector(".chat-messages");
+
+      // Mensaje de opciones del bot
+      var botMessage = document.createElement("div");
+      botMessage.classList.add("message", "bot-message");
+      botMessage.textContent = "Las opciones disponibles son: Soporte, IP, Status";
+      chatMessages.appendChild(botMessage);
+
+      // Hacer scroll hacia abajo para mostrar el último mensaje
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+
+      // Mostrar el campo de entrada del usuario después de enviar el mensaje de opciones del bot
+      document.getElementById("chat-input").style.display = "flex";
+      document.getElementById("user-input").focus();
+    }
+
+    // Función para procesar el mensaje del usuario
+    function processUserMessage(message) {
+      var chatMessages = document.querySelector(".chat-messages");
+
+      if (message.includes("soporte")) {
+        // Si el usuario escribió "soporte", enviar el mensaje con el enlace del servidor de Discord
+        var botMessage = document.createElement("div");
+        botMessage.classList.add("message", "bot-message");
+        botMessage.innerHTML = "Aquí está el enlace al servidor de Discord: <a href='https://discord.gg/UQN65sfHc7' target='_blank'>Unirse al servidor</a>";
+        chatMessages.appendChild(botMessage);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      } else if (message.includes("ip")) {
+        // Si el usuario escribió "ip", enviar el mensaje con la IP del servidor de Minecraft
+        var botMessage = document.createElement("div");
+        botMessage.classList.add("message", "bot-message");
+        botMessage.textContent = "La IP del servidor de Minecraft es: mc.hymex.xyz";
+        chatMessages.appendChild(botMessage);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      } else if (message.includes("status")) {
+        // Si el usuario escribió "status", enviar el mensaje con el enlace del estado del servidor
+        var botMessage = document.createElement("div");
+        botMessage.classList.add("message", "bot-message");
+        botMessage.innerHTML = "Aquí está el enlace al estado del servidor: <a href='https://web.hymex.xyz/status/' target='_blank'>Estado del servidor</a>";
+        chatMessages.appendChild(botMessage);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      } else {
+        // Si el usuario escribió algo que no sea "soporte", "ip" o "status", enviar nuevamente las opciones
+        sendBotOptions();
+      }
+    }
+
+    // Habilitar el botón de enviar si el usuario ha escrito algo
+    document.getElementById("user-input").addEventListener("input", function () {
+      var userInput = this.value.trim();
+      document.getElementById("sendButton").disabled = userInput === "";
+    });
+
+    // Llamar a la función para enviar el mensaje inicial del bot al cargar la página
+    window.onload = function () {
+      sendInitialBotMessage();
+    };
+  </script>
+
+</body>
+
+</html>
