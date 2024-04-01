@@ -11,36 +11,45 @@
       font-family: Arial, sans-serif;
       margin: 0;
       padding: 20px;
-      background-image: url('fondo.jpg');
+      background-color: #0A1822;
       background-repeat: no-repeat;
-      background-size: auto;
+      background-size: cover;
+      background-attachment: fixed;
+      color: #fff;
     }
 
     h1 {
       text-align: center;
-      color: white;
       margin-bottom: 20px;
     }
 
     .server {
-      background-color: white;
-      width: 30%;
-      height: auto;
+      background-color: rgba(0, 0, 0, 0.7);
+      width: 35%;
+      /* Aumentado el ancho */
+      max-width: 600px;
+      margin: 0 auto 20px;
       padding: 20px;
-      margin-bottom: 20px;
       border-radius: 8px;
       box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
       transition: all 0.3s ease;
     }
 
     .server-name {
-      font-size: 24px;
+      font-size: 20px;
       margin-bottom: 10px;
+      color: #fff;
     }
 
     .status {
       font-weight: bold;
-      font-size: 18px;
+      font-size: 16px;
+    }
+
+    .ping,
+    .version {
+      font-size: 14px;
+      color: #fff;
     }
 
     .offline {
@@ -50,37 +59,39 @@
     .online {
       color: #28a745;
     }
+
+    /* Estilo para Node: USA-1 */
+    .node-info {
+      font-size: 14px;
+      color: #fff;
+      margin-top: 5px;
+    }
   </style>
 </head>
 
 <body>
   <h1>Estado de nuestros servidores</h1>
-  <center>
-    <div id="serverStatus"></div>
-  </center>
+  <div id="serverStatus"></div>
   <h1>Estado de Servidores Hosteados en HymexHosting</h1>
-  <center>
-    <div id="hymexHostedServerStatus"></div>
-  </center>
+  <div id="hymexHostedServerStatus"></div>
 
   <script>
     var servers = [
       {name: "Proxy", ip: "154.16.171.166:25565", previousOnline: false},
       {name: "AuthLobby", ip: "154.16.171.166:25567", previousOnline: false},
       {name: "Lobby #1", ip: "154.16.171.166:25570", previousOnline: false},
+      {name: "Lobby #2", ip: "idk", previousOnline: false},
       {name: "SkyWars", ip: "154.16.171.166:25566", previousOnline: false},
-      {name: "Survival", ip: "154.16.171.166:25571", previousOnline: false},
-      // Puedes agregar más servidores aquí según sea necesario
+      {name: "Survival", ip: "154.16.171.166:25571", previousOnline: false}
     ];
 
     var hymexHostedServers = [
-      {name: "Survival TheMurft", ip: "themurft.hymex.xyz:25572", previousOnline: false},
-      // Agrega más servidores aquí si es necesario
+      {name: "Survival TheMurft", ip: "themurft.hymex.xyz:25572", previousOnline: false}
     ];
 
     window.onload = function () {
       updateStatus();
-      setInterval(updateStatus, 1000); // Actualiza el estado cada 5 segundos
+      setInterval(updateStatus, 200);
     };
 
     function updateStatus() {
@@ -92,6 +103,7 @@
       serversArray.forEach(function (server) {
         checkMinecraftServerStatus(server, containerId);
       });
+      reorderServers(containerId);
     }
 
     function checkMinecraftServerStatus(server, containerId) {
@@ -110,9 +122,9 @@
             var serverStatusContainer = document.getElementById(containerId);
             var serverElement = document.getElementById(server.name.replace(/\s+/g, ''));
             if (serverElement) {
-              serverElement.innerHTML = "<div class='server-name'>" + statusMessage + (currentOnline ? "<span class='status online'>En línea</span>" : "<span class='status offline'>Fuera de línea</span>") + "</div>";
+              serverElement.innerHTML = "<div class='server-name'>" + statusMessage + (currentOnline ? "<span class='status online'>En línea</span>" : "<span class='status offline'>Fuera de línea</span>") + "</div>" + "<div class='ping'>Ping: " + data.ping + " ms</div>" + "<div class='version'>Versión: " + data.version + "</div>" + "<div class='node-info'>Node: USA-1</div>"; // Agregado Node: USA-1
             } else {
-              serverStatusContainer.innerHTML += "<div class='server' id='" + server.name.replace(/\s+/g, '') + "'><div class='server-name'>" + statusMessage + (currentOnline ? "<span class='status online'>En línea</span>" : "<span class='status offline'>Fuera de línea</span>") + "</div></div>";
+              serverStatusContainer.innerHTML += "<div class='server' id='" + server.name.replace(/\s+/g, '') + "'><div class='server-name'>" + statusMessage + (currentOnline ? "<span class='status online'>En línea</span>" : "<span class='status offline'>Fuera de línea</span>") + "</div>" + "<div class='ping'>Ping: " + data.ping + " ms</div>" + "<div class='version'>Versión: " + data.version + "</div>" + "<div class='node-info'>Node: USA-1</div>"; // Agregado Node: USA-1
             }
           }
         })
@@ -126,6 +138,37 @@
             serverStatusContainer.innerHTML += "<div class='server' id='" + server.name.replace(/\s+/g, '') + "'><div class='server-name'>" + errorMessage + "</div></div>";
           }
         });
+    }
+
+    function reorderServers(containerId) {
+      var container = document.getElementById(containerId);
+      var servers = container.getElementsByClassName('server');
+
+      var onlineServers = [];
+      var offlineServers = [];
+
+      for (var i = 0; i < servers.length; i++) {
+        var server = servers[i];
+        if (server.querySelector('.status').classList.contains('online')) {
+          onlineServers.push(server);
+        } else {
+          offlineServers.push(server);
+        }
+      }
+
+      // Remove existing servers from the container
+      while (container.firstChild) {
+        container.removeChild(container.firstChild);
+      }
+
+      // Append online servers first, then offline servers
+      onlineServers.forEach(function (server) {
+        container.appendChild(server);
+      });
+
+      offlineServers.forEach(function (server) {
+        container.appendChild(server);
+      });
     }
   </script>
 </body>
